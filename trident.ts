@@ -221,4 +221,23 @@ abstract class EventBus {
 		this.registeredEventListeners = new Map();
 		this.registeredExecutors = new Map();
 	}
+	
+	public callEvent(event: string): boolean
+	{
+		let executors: EventDoublyLinkedList = this.registeredExecutors.get(event);
+		
+		let ran: boolean = false;
+		let node: EventNode = executors.getHead();
+		if(node != undefined)
+		{
+			ran = true;
+		}
+		
+		while(node != null)
+		{
+			let executor: MethodExecutor = node.getData();
+		}
+		
+		return ran;
+	}
 }

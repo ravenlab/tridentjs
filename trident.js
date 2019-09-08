@@ -154,4 +154,16 @@ class EventBus {
         this.registeredEventListeners = new Map();
         this.registeredExecutors = new Map();
     }
+    callEvent(event) {
+        let executors = this.registeredExecutors.get(event);
+        let ran = false;
+        let node = executors.getHead();
+        if (node != undefined) {
+            ran = true;
+        }
+        while (node != null) {
+            let executor = node.getData();
+        }
+        return ran;
+    }
 }
