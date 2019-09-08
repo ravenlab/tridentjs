@@ -22,14 +22,195 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+enum EventPriority {
+	
+	LOWEST = 0,
+	LOW = 1,
+	NORMAL = 2,
+	HIGH = 3,
+	HIGHEST = 4,
+	MONITOR = 5
+}
 
 class MethodExecutor {
 	
 }
 
-class EventDoublyLinkedList {
+class EventNode {
+	
+	private data: MethodExecutor;
+	private priority: number;
+	private next: EventNode;
+	private prev: EventNode;
+	constructor(data:MethodExecutor, priority: number)
+	{
+		this.data = data;
+		this.priority = priority;
+	}
+	
+	public getData(): MethodExecutor
+	{
+		return this.data;
+	}
+	
+	public getPriority(): number
+	{
+		return this.priority;
+	}
+	
+	public getNext(): EventNode
+	{
+		return this.next;
+	}
+	
+	public setNext(next: EventNode): void
+	{
+		this.next = next;
+	}
+	
+	public getPrev(): EventNode
+	{
+		return this.prev;
+	}
+	
+	public setPrev(prev: EventNode): void
+	{
+		this.prev = prev;
+	}
 	
 }
+
+class EventDoublyLinkedList {
+	
+	private head: EventNode;
+	constructor()
+	{
+		this.head = undefined;
+	}
+	
+	public getHead(): EventNode
+	{
+		return this.head;
+	}
+	
+	public insert(executor: MethodExecutor, priority: EventPriority): EventNode
+	{
+		if(executor == undefined || priority == undefined)
+		{
+			return undefined;
+		}
+		
+		let priorityValue: number = priority;
+		let newNode: EventNode = new EventNode(executor, priorityValue);
+		if(this.head == undefined)
+		{
+			this.head = newNode;
+			return newNode;
+		}
+		
+		let found: EventNode = this.findInsertionNode(priorityValue);
+		if(found === this.head && priorityValue < this.head.getPriority())
+		{
+			let oldHead: EventNode = this.head;
+			this.head = newNode;
+			this.head.setNext(oldHead);
+			oldHead.setPrev(this.head);
+			return newNode;
+		}
+		else if(found.getPriority() > priorityValue)
+		{
+			newNode.setNext(found);
+			newNode.setPrev(found.getPrev());
+			newNode.getPrev().setNext(newNode);
+			found.setPrev(newNode);
+			return newNode;
+		}
+		else if(found.getNext() == undefined)
+		{
+			found.setNext(newNode);
+			newNode.setPrev(found);
+			return newNode;
+		}
+		else
+		{
+			newNode.setNext(found.getNext());
+			found.setNext(newNode);
+			newNode.getNext().setPrev(newNode);
+			return newNode;
+		}
+	}
+	
+	public remove(executor: MethodExecutor): EventNode
+	{
+		let found: EventNode = this.find(executor);
+		
+		if(found == undefined)
+		{
+			return undefined;
+		}
+		
+		if(found == this.head)
+		{
+			if(this.head.getNext() == undefined)
+			{
+				this.head = undefined;
+			}
+			else
+			{
+				this.head = this.head.getNext();
+			}
+			
+			return found;
+		}
+		else if(found.getNext() == undefined)
+		{
+			found.getPrev().setNext(undefined);
+			return found;
+		}
+		else
+		{
+			found.getPrev().setNext(found.getNext());
+			return found;
+		}
+	}
+	
+	public find(executor: MethodExecutor): EventNode
+	{
+		let node: EventNode = this.head;
+		while(node != undefined)
+		{
+			if(node.getData() == executor)
+				return node;
+			node = node.getNext();
+		}
+		
+		return undefined;
+	}
+	
+	private findInsertionNode(priorityValue: number): EventNode
+	{
+		let next: EventNode = this.head;
+		while(next != undefined)
+		{
+			if(next.getNext() == undefined)
+			{
+				return next;
+			}
+			else if(next.getPriority() == priorityValue && next.getNext().getPriority() > priorityValue)
+			{
+				return next;
+			}
+			else if(next.getPriority() > priorityValue)
+			{
+				return next;
+			}
+			next = next.getNext();
+		}
+		
+		return undefined;
+	}
+}
+	
 
 abstract class EventBus {
 	
