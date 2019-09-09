@@ -30,8 +30,6 @@ var EventPriority;
     EventPriority[EventPriority["HIGHEST"] = 4] = "HIGHEST";
     EventPriority[EventPriority["MONITOR"] = 5] = "MONITOR";
 })(EventPriority || (EventPriority = {}));
-class MethodExecutor {
-}
 class EventNode {
     constructor(data, priority) {
         this.data = data;
@@ -151,10 +149,9 @@ class EventDoublyLinkedList {
 }
 class EventBus {
     constructor() {
-        this.registeredEventListeners = new Map();
         this.registeredExecutors = new Map();
     }
-    callEvent(event) {
+    callEvent(event, data) {
         let executors = this.registeredExecutors.get(event);
         let ran = false;
         let node = executors.getHead();
@@ -163,7 +160,19 @@ class EventBus {
         }
         while (node != null) {
             let executor = node.getData();
+            executor(data);
+            node = node.getNext();
         }
         return ran;
+    }
+    registerListener(event, listener, priority) {
+        if (listener == undefined) {
+            return false;
+        }
+        if (this.registeredExecutors.get(event) == undefined) {
+            this.registeredExecutors.set(event, new EventDoublyLinkedList());
+        }
+        this.registeredExecutors.get(event).insert(listener, priority);
+        return true;
     }
 }

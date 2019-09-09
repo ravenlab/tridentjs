@@ -32,23 +32,20 @@ enum EventPriority {
 	MONITOR = 5
 }
 
-class MethodExecutor {
-	
-}
 
 class EventNode {
 	
-	private data: MethodExecutor;
+	private data: any;
 	private priority: number;
 	private next: EventNode;
 	private prev: EventNode;
-	constructor(data:MethodExecutor, priority: number)
+	constructor(data:any, priority: number)
 	{
 		this.data = data;
 		this.priority = priority;
 	}
 	
-	public getData(): MethodExecutor
+	public getData(): any
 	{
 		return this.data;
 	}
@@ -93,7 +90,7 @@ class EventDoublyLinkedList {
 		return this.head;
 	}
 	
-	public insert(executor: MethodExecutor, priority: EventPriority): EventNode
+	public insert(executor: any, priority: EventPriority): EventNode
 	{
 		if(executor == undefined || priority == undefined)
 		{
@@ -140,7 +137,7 @@ class EventDoublyLinkedList {
 		}
 	}
 	
-	public remove(executor: MethodExecutor): EventNode
+	public remove(executor: any): EventNode
 	{
 		let found: EventNode = this.find(executor);
 		
@@ -174,7 +171,7 @@ class EventDoublyLinkedList {
 		}
 	}
 	
-	public find(executor: MethodExecutor): EventNode
+	public find(executor: any): EventNode
 	{
 		let node: EventNode = this.head;
 		while(node != undefined)
@@ -214,15 +211,13 @@ class EventDoublyLinkedList {
 
 abstract class EventBus {
 	
-	private registeredEventListeners: Map<any, Array<MethodExecutor>>;
 	private registeredExecutors: Map<string, EventDoublyLinkedList>;
 	constructor()
 	{
-		this.registeredEventListeners = new Map();
 		this.registeredExecutors = new Map();
 	}
 	
-	public callEvent(event: string): boolean
+	public callEvent(event: string, data: any): boolean
 	{
 		let executors: EventDoublyLinkedList = this.registeredExecutors.get(event);
 		
@@ -235,9 +230,28 @@ abstract class EventBus {
 		
 		while(node != null)
 		{
-			let executor: MethodExecutor = node.getData();
+			let executor: any = node.getData();
+			executor(data);
+			node = node.getNext();
 		}
 		
 		return ran;
+	}
+	
+	public registerListener(event:string, listener: any, priority: EventPriority): boolean
+	{
+		if(listener == undefined)
+		{
+			return false;
+		}
+		
+		if(this.registeredExecutors.get(event) == undefined)
+		{
+			this.registeredExecutors.set(event, new EventDoublyLinkedList());
+		}
+		
+		this.registeredExecutors.get(event).insert(listener, priority);
+		
+		return true;
 	}
 }
