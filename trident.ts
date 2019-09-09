@@ -209,7 +209,7 @@ class EventDoublyLinkedList {
 }
 	
 
-abstract class EventBus {
+class EventBus {
 	
 	private registeredExecutors: Map<string, EventDoublyLinkedList>;
 	constructor()
@@ -253,5 +253,19 @@ abstract class EventBus {
 		this.registeredExecutors.get(event).insert(listener, priority);
 		
 		return true;
+	}
+	
+	public unregisterListener(listener: any): boolean
+	{
+		let removed: boolean = false;
+		for(let list of this.registeredExecutors.values())
+		{
+			if(list.remove(listener) != undefined)
+			{
+				removed = true;
+			}
+		}
+		
+		return removed;
 	}
 }

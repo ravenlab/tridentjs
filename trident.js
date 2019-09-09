@@ -175,4 +175,13 @@ class EventBus {
         this.registeredExecutors.get(event).insert(listener, priority);
         return true;
     }
+    unregisterListener(listener) {
+        let removed = false;
+        for (let list of this.registeredExecutors.values()) {
+            if (list.remove(listener) != undefined) {
+                removed = true;
+            }
+        }
+        return removed;
+    }
 }
